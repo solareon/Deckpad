@@ -18,7 +18,7 @@ else
     fi
 
     # Get the Steam user ID
-    steam_user_id=$(find "${steam_profile}" -type d | head -n 1)
+    steam_user_id=$(ls "$steam_profile" | head -n 1)
     if [ -z "$steam_user_id" ]; then
       echo "Steam user ID not found. Aborting." >&2
       exit 1
