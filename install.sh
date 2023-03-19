@@ -49,27 +49,30 @@ else
     tags=""
 
     # Generate the binary data for the new entry
-    full_entryID=$(printf '\x00%s\x00' "$entryID")
-    full_appName=$(printf '\x01appname\x00%s\x00' "$appName")
-    full_quotedPath=$(printf '\x01exe\x00%s\x00' "$(printf '%q' "$unquotedPath")")
-    full_startDir=$(printf '\x01StartDir\x00%s\x00' "$startDir")
-    full_iconPath=$(printf '\x01icon\x00%s\x00' "$iconPath")
-    full_shortcutPath=$(printf '\x01ShortcutPath\x00%s\x00' "$shortcutPath")
-    full_launchOptions=$(printf '\x01LaunchOptions\x00%s\x00' "$launchOptions")
-    full_isHidden=$(printf '\x02IsHidden\x00%s\x00\x00\x00' "$isHidden")
-    full_allowDeskConf=$(printf '\x02AllowDesktopConfig\x00%s\x00\x00\x00' "$allowDeskConf")
-    full_allowOverlay=$(printf '\x02AllowOverlay\x00%s\x00\x00\x00' "$allowOverlay")
-    full_openVR=$(printf '\x02OpenVR\x00%s\x00\x00\x00' "$openVR")
-    full_lastPlayTime=$(printf '\x02LastPlayTime\x00%s' "$(printf '\x00%.0s' {1..4})")
-    full_tags=$(printf '\x00tags\x00%s\x08\x08' "$tags")
+    # Use # as a delimiter instead of the null byte
+    full_entryID=$(printf '#%s#' "$entryID")
+    full_appName=$(printf '#appname#%s#' "$appName")
+    full_quotedPath=$(printf '#exe#%s#' "$(printf '%q' "$unquotedPath")")
+    full_startDir=$(printf '#StartDir#%s#' "$startDir")
+    full_iconPath=$(printf '#icon#%s#' "$iconPath")
+    full_shortcutPath=$(printf '#ShortcutPath#%s#' "$shortcutPath")
+    full_launchOptions=$(printf '#LaunchOptions#%s#' "$launchOptions")
+    full_isHidden=$(printf '#IsHidden#%s##' "$isHidden")
+    full_allowDeskConf=$(printf '#AllowDesktopConfig#%s##' "$allowDeskConf")
+    full_allowOverlay=$(printf '#AllowOverlay#%s##' "$allowOverlay")
+    full_openVR=$(printf '#OpenVR#%s##' "$openVR")
+    full_lastPlayTime=$(printf '#LastPlayTime#%s' "$(printf '#%.0s' {1..4})")
+    full_tags=$(printf '#tags#%s##' "$tags")
 
-    newEntry="$full_entryID$full_appName$full_quotedPath$full_startDir$full_iconPath$full_shortcutPath$full_launchOptions$full_isHidden$full_allowDeskConf$full_allowOverlay$full_openVR$full_lastPlayTime$full_tags"
+    # Replace the # delimiter with the null byte
+    newEntry=$(echo "$full_entryID$full_appName$full_quotedPath$full_startDir$full_iconPath$full_shortcutPath$full_launchOptions$full_isHidden$full_allowDeskConf$full_allowOverlay$full_openVR$full_lastPlayTime$full_tags" | tr '#' '\x00')
 
     if grep -q -F "$full_launchOptions" "${shortcuts_file}"; then
         echo "The entry already exists in the shortcuts.vdf file."
     else
         # Insert the new entry before the final "\x08\x08" sequence
-        sed -i -e "s/\x08\x08$/$newEntry\x08\x08/" "${shortcuts_file}"
+        # Use | as the delimiter in the sed command to avoid conflicts with / in the variable
+        sed -i -e "s|\x08\x08$|$newEntry\x08\x08|" "${shortcuts_file}"
         echo "The entry has been added to the shortcuts.vdf file."
     fi
 
