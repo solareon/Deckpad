@@ -47,31 +47,17 @@ Welcome Screen              |  Running Screen
     cd ~ && git clone https://github.com/FlorianKempenich/Deckpad.git
     ```
     
-3. Run `./initialize_after_os_update.sh`
+3. Run `./install.sh`
     
     This will:
     
     - Disable `readonly` mode on SteamOS
     - Initialize `pacman`
     - Install `xorg-xinput` and `figlet`
-4. Download: [VirtualHere USB Server for Linux (x86_64)](https://www.virtualhere.com/sites/default/files/usbserver/vhusbdx86_64)      
-5. Put in `~/Deckpad/virtualhere/`
-6. Make executable: `chmod +x vhusbdx86_64`
-7. Add a “fake” game to the steam library *(shortcut will be updated, so the app doesn’t matter, pick whichever)*
-8. Select “fake” game and click `Properties`
-9. Replace with these values
-    
-    
-    | Title | Deckpad |
-    | --- | --- |
-    | Target | `env` |
-    | Start | `"/home/deck/Deckpad"` (don’t remove " symbols) |
-    | Launch Opts | `-u LD_PRELOAD konsole --fullscreen -e ./deckpad.sh` |
-    - and this icon
-        
-        ![controller_wireless_icon.png](https://github.com/FlorianKempenich/Deckpad/blob/main/icon.png)
-        
-    
+    - Download VirtualHere
+    - Create shortcuts.vdf (if needed)
+    - Add shortcut to deckpad.sh
+
 10. Launch it once
 
 

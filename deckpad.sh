@@ -1,6 +1,6 @@
 #!/bin/bash
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
-cd "$DIR"
+cd "$DIR" || exit
 set -o pipefail
 
 function run_as_root() {
@@ -25,13 +25,17 @@ function run_as_root() {
     wait quit_prompt_pid
 }
 
+# Check if the user has root privileges
+if [ "$EUID" -ne 0 ]; then
+  echo "This script needs to be run with root privileges. Elevating..." >&2
+  exec sudo "$0" "$@"
+fi
+
 source ./functions.sh
 prepare_fullscreen
-show_prompt "Enter sudo password" 'big'
-show_prompt "(screen will dim)" 'big'
 
 xhost local:root >/dev/null
 FUNC=$(declare -f run_as_root)
-sudo bash -c "$FUNC; run_as_root"
+bash -c "$FUNC; run_as_root"
 
-cd - >/dev/null
+cd - >/dev/null || exit

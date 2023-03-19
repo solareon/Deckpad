@@ -1,3 +1,7 @@
+#!/bin/bash
+
+VH_BIN="/usr/local/bin/vhusbdx86_64"
+
 function prepare_fullscreen {
     clear
     echo ""
@@ -19,7 +23,7 @@ function show_prompt {
         style=$2
     fi
     if command -v figlet &>/dev/null; then
-        figlet -c -w 180 -f $style -k -- "$prompt"
+        figlet -c -w 180 -f "$style" -k -- "$prompt"
         echo ""
         echo ""
         echo ""
@@ -41,10 +45,10 @@ function block_until_press_on_target {
     TOUCHSCREEN_ID=$(xinput --list 2>/dev/null | grep -i -m 1 'touch' | grep -o 'id=[0-9]\+' | grep -o '[0-9]\+')
     touch_x=0
     touch_y=0
-    while (( $touch_x < $TARGET_X_MIN )) || (( $touch_x > $TARGET_X_MAX )) || (( $touch_y < $TARGET_Y_MIN )) || (( $touch_y > $TARGET_Y_MAX )); do
+    while (( touch_x < TARGET_X_MIN )) || (( touch_x > TARGET_X_MAX )) || (( touch_y < TARGET_Y_MIN )) || (( touch_y > TARGET_Y_MAX )); do
         _show_run_prompt
         block_until_mouse_click
-        touch_state=$(xinput --query-state $TOUCHSCREEN_ID 2>/dev/null)
+        touch_state=$(xinput --query-state "$TOUCHSCREEN_ID" 2>/dev/null)
         if [[ $touch_state =~ valuator\[0]=([0-9]*) ]]; then
             touch_x=${BASH_REMATCH[1]}
         fi
@@ -89,13 +93,13 @@ function restore_brightness {
 }
 
 function start_virtualhere {
-    virtualhere/vhusbdx86_64 >/dev/null 2>&1 &
+    ${VH_BIN} >/dev/null 2>&1 &
     echo $! >./virtualhere_pid
 }
 
 function stop_virtualhere {
-    kill -s SIGINT $(cat ./virtualhere_pid)
-    wait $(cat ./virtualhere_pid)
+    kill -s SIGINT "$(cat ./virtualhere_pid)"
+    wait "$(cat ./virtualhere_pid)"
     rm ./virtualhere_pid
 }
 
@@ -146,6 +150,6 @@ function run_prompt_start {
     echo $! >./run_prompt_pid
 }
 function run_prompt_stop {
-    kill -s SIGKILL $(cat ./run_prompt_pid)
+    kill -s SIGKILL "$(cat ./run_prompt_pid)"
     rm ./run_prompt_pid
 }
