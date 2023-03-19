@@ -30,14 +30,12 @@ if [ "$(id -u)" -ne 0 ]; then
   echo "This script needs to be run with root privileges. Elevating..." >&2
   exec sudo "$0" "$@"
 else
+    source ./functions.sh
+    prepare_fullscreen
 
-source ./functions.sh
-prepare_fullscreen
+    xhost local:root >/dev/null
+    FUNC=$(declare -f run_as_root)
+    bash -c "$FUNC; run_as_root"
 
-xhost local:root >/dev/null
-FUNC=$(declare -f run_as_root)
-bash -c "$FUNC; run_as_root"
-
-cd - >/dev/null || exit
-
+    cd - >/dev/null || exit
 fi
