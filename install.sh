@@ -12,7 +12,7 @@ if [ "$EUID" -ne 0 ]; then
 fi
 
 # Get the user's Steam profile path
-steam_profile=$(find ~/.steam/steam/ -type d -name "userdata" | head -n 1)
+steam_profile=$(find /home/deck/.steam/steam/ -type d -name "userdata" | head -n 1)
 if [ -z "$steam_profile" ]; then
   echo "Steam profile not found. Aborting." >&2
   exit 1

@@ -26,10 +26,10 @@ function run_as_root() {
 }
 
 # Check if the user has root privileges
-if [ "$EUID" -ne 0 ]; then
+if [ "$(id -u)" -ne 0 ]; then
   echo "This script needs to be run with root privileges. Elevating..." >&2
   exec sudo "$0" "$@"
-fi
+else
 
 source ./functions.sh
 prepare_fullscreen
@@ -39,3 +39,5 @@ FUNC=$(declare -f run_as_root)
 bash -c "$FUNC; run_as_root"
 
 cd - >/dev/null || exit
+
+fi
