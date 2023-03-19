@@ -34,6 +34,8 @@ else
         echo "The shortcuts.vdf file has been created."
     fi
 
+    chown deck:deck "${shortcuts_file}"
+
     # Creating shortcut entry to add to shortcuts.vdf
     entryID=$(($(date +%s%N)/1000000000))
     appName="Deckpad"
@@ -51,23 +53,23 @@ else
     # Generate the binary data for the new entry
     # Use # as a delimiter instead of the null byte
     full_entryID=$(printf '#%s#' "$entryID")
-    full_appName=$(printf '#appname#%s#' "$appName")
-    full_quotedPath=$(printf '#exe#%s#' "$(printf '%q' "$unquotedPath")")
-    full_startDir=$(printf '#StartDir#%s#' "$startDir")
-    full_iconPath=$(printf '#icon#%s#' "$iconPath")
-    full_shortcutPath=$(printf '#ShortcutPath#%s#' "$shortcutPath")
-    full_launchOptions=$(printf '#LaunchOptions#%s#' "$launchOptions")
-    full_isHidden=$(printf '#IsHidden#%s##' "$isHidden")
-    full_allowDeskConf=$(printf '#AllowDesktopConfig#%s##' "$allowDeskConf")
-    full_allowOverlay=$(printf '#AllowOverlay#%s##' "$allowOverlay")
-    full_openVR=$(printf '#OpenVR#%s##' "$openVR")
-    full_lastPlayTime=$(printf '#LastPlayTime#%s' "$(printf '#%.0s' {1..4})")
+    full_appName=$(printf '\x01appname#%s#' "$appName")
+    full_quotedPath=$(printf '\x01exe#%s#' "$(printf '%q' "$unquotedPath")")
+    full_startDir=$(printf '\x01StartDir#%s#' "$startDir")
+    full_iconPath=$(printf '\x01icon#%s#' "$iconPath")
+    full_shortcutPath=$(printf '\x01ShortcutPath#%s#' "$shortcutPath")
+    full_launchOptions=$(printf '\x01LaunchOptions#%s#' "$launchOptions")
+    full_isHidden=$(printf '\x01IsHidden#%s###' "$isHidden")
+    full_allowDeskConf=$(printf '\x02AllowDesktopConfig#%s###' "$allowDeskConf")
+    full_allowOverlay=$(printf '\x02AllowOverlay#%s###' "$allowOverlay")
+    full_openVR=$(printf '\x02OpenVR#%s###' "$openVR")
+    full_lastPlayTime=$(printf '\x02LastPlayTime#%s' "$(printf '#%.0s' {1..4})")
     full_tags=$(printf '#tags#%s##' "$tags")
 
     # Replace the # delimiter with the null byte
     newEntry=$(echo "$full_entryID$full_appName$full_quotedPath$full_startDir$full_iconPath$full_shortcutPath$full_launchOptions$full_isHidden$full_allowDeskConf$full_allowOverlay$full_openVR$full_lastPlayTime$full_tags" | tr '#' '\x00')
 
-    if grep -q -F "$full_launchOptions" "${shortcuts_file}"; then
+    if grep -q -F "$launchOptions" "${shortcuts_file}"; then
         echo "The entry already exists in the shortcuts.vdf file."
     else
         # Insert the new entry before the final "\x08\x08" sequence
